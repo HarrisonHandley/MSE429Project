@@ -82,8 +82,8 @@ PP =2.5;                    % Length second Length
 %%%%%%%%%%%%%%%%%%%%
 %INVERSE KINEMATICS%
 %%%%%%%%%%%%%%%%%%%%
-x0=0; y0=0; z0=2000;  %Random Position and Orientation of Mobile Platform
-gamma=0; beta=0; alpha=0;
+x0=500; y0=-1000; z0=2000;  %Random Position and Orientation of Mobile Platform
+gamma=20; beta=30; alpha=-10;
 R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
        cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
        sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
@@ -114,24 +114,45 @@ Lnew = zeros(2,6);
 theta2 = zeros(2,6);
 R = zeros(3,3);
 di = zeros(3,6);
+unit = zeros(3,6);
 Lnorm = zeros(1,6);
 
 for i = 1:6
     di(:,i) = [x0; y0; z0] + LL*R0_ee*[cosd(anglePlat(i));sind(anglePlat(i));0] - L*[cosd(Betad(i)); sind(Betad(i)); 0]; 
     Lnorm(i) = norm(di(:,i));
+    unit(:,i) = di(:,i)./Lnorm(i);
+    theta2(1,i) = atan2d(di(3,i)/Lnorm(i), sqrt(1-(di(3,i)/Lnorm(i))^2));
+    theta2(2,i) = -theta2(1,i);
+    theta1(1,i) = atan2d(di(2,i)/(L*cosd(theta2(1,i))), di(1,i)/(L*cosd(theta2(1,i))));
+    theta1(2,i) = atan2d(di(2,i)/(L*cosd(theta2(2,i))), di(1,i)/(L*cosd(theta2(2,i))));
+    
+%     R(:,:,i) = [cosd(90-theta2(1,i))*cosd(theta1(1,i))  -cosd(90-theta2(1,i))*sind(theta1(1,i)) sind(90-theta2(1,i))
+%                                      sind(theta1(1,i))  cosd(theta1(1,i))                       0
+%                 -cosd(theta1(1,i))*sind(90-theta2(1,i)) sind(theta1(1,i))*sind(90-theta2(1,i))  1];
+      R(:,:,i) = [cosd(theta1(1,i))*cosd(90-theta2(1,i)) -sind(theta1(1,i)) cosd(theta1(1,i))*sind(90-theta2(1,i))
+                  cosd(90-theta2(1,i))*sind(theta1(1,i)) cosd(theta1(1,i))  sind(theta1(1,i))*sind(90-theta2(1,i))
+                  -sind(90-theta2(1,i))                  0                  cosd(90-theta2(1,i))];
+
+
     P(:,i) = [x0; y0; z0] + LL*R0_ee*[cosd(anglePlat(i));sind(anglePlat(i));0];
-    theta1(1,i) = atan2d(-P(3,i),-P(1,i)*cosd(Betad(i))-P(2,i)*sind(Betad(i)));
-    theta1(2,i) = atan2d(P(3,i),P(1,i)*cosd(Betad(i))+P(2,i)*sind(Betad(i)));
-    Lnew(1,i) = sqrt((P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)^2 + (P(3,i)*sind(theta1(1,i)) + P(1,i)*cosd(Betad(i))*cosd(theta1(1,i)) + P(2,i)*sind(Betad(i))*cosd(theta1(1,i)))^2);
-    Lnew(2,i) = sqrt((P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)^2 + (P(3,i)*sind(theta1(2,i)) + P(1,i)*cosd(Betad(i))*cosd(theta1(2,i)) + P(2,i)*sind(Betad(i))*cosd(theta1(2,i)))^2);
-    theta2(1,i) = atan2d((P(3,i)*sind(theta1(1,i))+P(1,i)*cosd(Betad(i))*cosd(theta1(1,i))+P(2,i)*sind(Betad(i))*cosd(theta1(1,i)))/Lnew(1,i),(P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)/Lnew(1,i));
-    theta2(2,i) = atan2d((P(3,i)*sind(theta1(2,i))+P(1,i)*cosd(Betad(i))*cosd(theta1(2,i))+P(2,i)*sind(Betad(i))*cosd(theta1(2,i)))/Lnew(2,i),(P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)/Lnew(2,i));
-    R(:,:,i) = [cosd(theta1(1,i))*cosd(theta2(1,i)) -sind(theta1(1,i)) cosd(theta1(1,i))*sind(theta2(1,i))
-                sind(theta2(1,i))                   0                  -cosd(theta2(1,i))
-                cosd(theta2(1,i))*sind(theta1(1,i)) cosd(theta1(1,i))  sind(theta1(1,i))*sind(theta2(1,i))];
-%     R(:,:,i) = [cosd(theta1(1,i))*cosd(theta2(1,i)) -cosd(theta1(1,i))*sind(theta2(1,i)) -sind(theta1(1,i))
-%                 sind(theta2(1,i))                   cosd(theta2(1,i))                    0
-%                 cosd(theta2(1,i))*sind(theta1(1,i)) -sind(theta1(1,i))*sind(theta2(1,i)) cosd(theta1(1,i))];
+%     theta1(1,i) = atan2d(-P(3,i),-P(1,i)*cosd(Betad(i))-P(2,i)*sind(Betad(i)));
+%     theta1(2,i) = atan2d(P(3,i),P(1,i)*cosd(Betad(i))+P(2,i)*sind(Betad(i)));
+%     Lnew(1,i) = sqrt((P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)^2 + (P(3,i)*sind(theta1(1,i)) + P(1,i)*cosd(Betad(i))*cosd(theta1(1,i)) + P(2,i)*sind(Betad(i))*cosd(theta1(1,i)))^2);
+%     Lnew(2,i) = sqrt((P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)^2 + (P(3,i)*sind(theta1(2,i)) + P(1,i)*cosd(Betad(i))*cosd(theta1(2,i)) + P(2,i)*sind(Betad(i))*cosd(theta1(2,i)))^2);
+%     theta2(1,i) = atan2d((P(3,i)*sind(theta1(1,i))+P(1,i)*cosd(Betad(i))*cosd(theta1(1,i))+P(2,i)*sind(Betad(i))*cosd(theta1(1,i)))/Lnew(1,i),(P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)/Lnew(1,i));
+%     theta2(2,i) = atan2d((P(3,i)*sind(theta1(2,i))+P(1,i)*cosd(Betad(i))*cosd(theta1(2,i))+P(2,i)*sind(Betad(i))*cosd(theta1(2,i)))/Lnew(2,i),(P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)/Lnew(2,i));
+% %     R(:,:,i) = [cosd(theta1(1,i))*cosd(theta2(1,i)) -sind(theta1(1,i)) cosd(theta1(1,i))*sind(theta2(1,i))
+% %                 sind(theta2(1,i))                   0                  -cosd(theta2(1,i))
+% %                 cosd(theta2(1,i))*sind(theta1(1,i)) cosd(theta1(1,i))  sind(theta1(1,i))*sind(theta2(1,i))];
+% %     R(:,:,i) = [cosd(theta1(2,i))*cosd(theta2(2,i)) -cosd(theta1(2,i))*sind(theta2(2,i)) -sind(theta1(2,i))
+% %                 sind(theta2(2,i))                   cosd(theta2(2,i))                    0
+% %                 cosd(theta2(2,i))*sind(theta1(2,i)) -sind(theta1(2,i))*sind(theta2(2,i)) cosd(theta1(2,i))];
+% 
+%     R(:,:,i) = [cosd(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i))-sind(Betad(i))*sind(theta2(1,i)) -cosd(Betad(i))*sind(theta1(1,i))                   sind(Betad(i))*cosd(theta2(1,i))+cosd(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))
+%                 cosd(Betad(i))*sind(theta2(2,i))+sind(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i)) -sind(Betad(i))*sind(theta1(1,i))                   sind(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))-cosd(Betad(i))*cosd(theta2(1,i))
+%                 cosd(theta2(2,i))*sind(theta1(2,i))                                                 cosd(theta1(1,i))                                   sind(theta1(1,i))*sind(theta2(1,i))];
+    
+
 end
 
 %%%%%%%%%%%%%%%%%%%%
