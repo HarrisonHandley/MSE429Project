@@ -22,7 +22,7 @@ view(60,30)
    line([0,0],[0,arrow_length],[0,0]); text(0,arrow_length*1.1, 0,'y_0','FontSize',14); 
    line([0,arrow_length],[0,0],[0,0]); text(arrow_length*1.1, 0, 0,'x_0','FontSize',14); 
 
-%% Convert figure into Object (LOAD YUOR PARTS)       
+%% Convert figure into Object (LOAD YOUR PARTS)       
 load('Platform.mat');
 setappdata(0,'object_data',object);
 object = getappdata(0,'object_data');
@@ -118,19 +118,22 @@ theta2 = zeros(2,6);
 R = zeros(3,3);
 di = zeros(3,6);
 unit = zeros(3,6);
-Lnorm = zeros(1,6);
+Lnorm = zeros(1,6);         
+b0bi = L*[cosd(Beta(1)),cosd(Beta(2)),cosd(Beta(3)),cosd(Beta(4)),cosd(Beta(5)),cosd(Beta(6));...
+          sind(Beta(1)),sind(Beta(2)),sind(Beta(3)),sind(Beta(4)),sind(Beta(5)),sind(Beta(6));
+          0,0,0,0,0,0];
+p0pi = LL*[cosd(anglePlat(1)),cosd(anglePlat(2)),cosd(anglePlat(3)),cosd(anglePlat(4)),cosd(anglePlat(5)),cosd(anglePlat(6));...
+          sind(anglePlat(1)),sind(anglePlat(2)),sind(anglePlat(3)),sind(anglePlat(4)),sind(anglePlat(5)),sind(anglePlat(6));
+          0,0,0,0,0,0];
 
+    
 
 
 for i = 1:6
-    di(:,i) = [x0; y0; z0] + LL*R0_ee*[cosd(anglePlat(i));sind(anglePlat(i));0] - L*[cosd(Beta(i)); sind(Beta(i)); 0]; 
+    di(:,i) = [x0; y0; z0] + LL*R0_ee*[cosd(anglePlat(i));sind(anglePlat(i));0] - b0bi(:,i); 
     
     Lnorm(i) = vecnorm(di(:,i));
     unit(:,i) = di(:,i)./Lnorm(i);
-%     theta2(1,i) = atan2d(di(3,i)/Lnorm(i), sqrt(1-(di(3,i)/Lnorm(i))^2));
-%     theta2(2,i) = -theta2(1,i);
-%     theta1(1,i) = atan2d(di(2,i)/(L*cosd(theta2(1,i))), di(1,i)/(L*cosd(theta2(1,i))));
-%     theta1(2,i) = atan2d(di(2,i)/(L*cosd(theta2(2,i))), di(1,i)/(L*cosd(theta2(2,i))));   
 
     %   Generate the position vector of spherical joint for IK
     P(:,i) = [x0; y0; z0] + LL*R0_ee*[cosd(anglePlat(i));sind(anglePlat(i));0];
@@ -145,30 +148,12 @@ for i = 1:6
     Lnew(2,i) = sqrt((P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)^2 + (P(3,i)*sind(theta1(2,i)) + P(1,i)*cosd(Betad(i))*cosd(theta1(2,i)) + P(2,i)*sind(Betad(i))*cosd(theta1(2,i)))^2);
     
     %   Theta 2 Inverse Kinematic Equations used as input for the FK
-    theta2(1,i) = atan2d((P(3,i)*sind(theta1(1,i))+P(1,i)*cosd(Betad(i))*cosd(theta1(1,i))+P(2,i)*sind(Betad(i))*cosd(theta1(1,i)))/Lnew(1,i),(P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-1.5)/Lnew(1,i));
-    theta2(2,i) = atan2d((P(3,i)*sind(theta1(2,i))+P(1,i)*cosd(Betad(i))*cosd(theta1(2,i))+P(2,i)*sind(Betad(i))*cosd(theta1(2,i)))/Lnew(2,i),(P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-1.5)/Lnew(2,i));
-    
-%     R(:,:,i) = [cosd(90-theta2(1,i))*cosd(theta1(1,i))  -cosd(90-theta2(1,i))*sind(theta1(1,i)) sind(90-theta2(1,i))
-%                                      sind(theta1(1,i))  cosd(theta1(1,i))                       0
-%                 -cosd(theta1(1,i))*sind(90-theta2(1,i)) sind(theta1(1,i))*sind(90-theta2(1,i))  1];
-%       R(:,:,i) = [cosd(theta1(1,i))*cosd(90-theta2(1,i)) -sind(theta1(1,i)) cosd(theta1(1,i))*sind(90-theta2(1,i))
-%                   cosd(90-theta2(1,i))*sind(theta1(1,i)) cosd(theta1(1,i))  sind(theta1(1,i))*sind(90-theta2(1,i))
-%                   -sind(90-theta2(1,i))                  0                  cosd(90-theta2(1,i))];
-
-%     R(:,:,i) = [cosd(theta1(1,i))*cosd(theta2(1,i)) -sind(theta1(1,i)) cosd(theta1(1,i))*sind(theta2(1,i))
-%                 sind(theta2(1,i))                   0                  -cosd(theta2(1,i))
-%                 cosd(theta2(1,i))*sind(theta1(1,i)) cosd(theta1(1,i))  sind(theta1(1,i))*sind(theta2(1,i))];
-%     R(:,:,i) = [cosd(theta1(2,i))*cosd(theta2(2,i)) -cosd(theta1(2,i))*sind(theta2(2,i)) -sind(theta1(2,i))
-%                 sind(theta2(2,i))                   cosd(theta2(2,i))                    0
-%                 cosd(theta2(2,i))*sind(theta1(2,i)) -sind(theta1(2,i))*sind(theta2(2,i)) cosd(theta1(2,i))];
-
-%     R(:,:,i) = [cosd(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i))-sind(Betad(i))*sind(theta2(1,i)) -cosd(Betad(i))*sind(theta1(1,i))                   sind(Betad(i))*cosd(theta2(1,i))+cosd(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))
-%                 cosd(Betad(i))*sind(theta2(2,i))+sind(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i)) -sind(Betad(i))*sind(theta1(1,i))                   sind(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))-cosd(Betad(i))*cosd(theta2(1,i))
-%                 cosd(theta2(2,i))*sind(theta1(2,i))                                                 cosd(theta1(1,i))                                   sind(theta1(1,i))*sind(theta2(1,i))];
-%     
+    theta2(1,i) = atan2d((P(3,i)*sind(theta1(1,i))+P(1,i)*cosd(Betad(i))*cosd(theta1(1,i))+P(2,i)*sind(Betad(i))*cosd(theta1(1,i)))/Lnew(1,i),(P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)/Lnew(1,i));
+    theta2(2,i) = atan2d((P(3,i)*sind(theta1(2,i))+P(1,i)*cosd(Betad(i))*cosd(theta1(2,i))+P(2,i)*sind(Betad(i))*cosd(theta1(2,i)))/Lnew(2,i),(P(1,i)*sind(Betad(i))-P(2,i)*cosd(Betad(i))-L)/Lnew(2,i));
+       
 
 %Rotation Matrix to go from P to B0 
-R(:,:,i) = [cosd(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i))-sind(Betad(i))*sind(theta2(1,i)),   -cosd(Betad(i))*sind(theta1(1,i)), sind(Betad(i))*cosd(theta2(1,i))+cosd(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))
+    R(:,:,i) = [cosd(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i))-sind(Betad(i))*sind(theta2(1,i)),   -cosd(Betad(i))*sind(theta1(1,i)), sind(Betad(i))*cosd(theta2(1,i))+cosd(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))
             cosd(Betad(i))*sind(theta2(1,i)) + sind(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i)), -sind(Betad(i))*sind(theta1(1,i)), -cosd(Betad(i))*cosd(theta2(1,i))+sind(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))
                                                               cosd(theta2(1,i))*sind(theta1(1,i)),  cosd(theta1(1,i)),                sind(theta1(1,i))*sind(theta2(1,i))];                                                                                       
 
@@ -177,11 +162,16 @@ R(:,:,i) = [cosd(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i))-sind(Betad(i))*si
 %              cosd(Betad(i))*sind(theta2(1,i)) + sind(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i)), cosd(Betad(i))*cosd(theta2(1,i))-sind(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i)), -sind(Betad(i))*sind(theta1(1,i))
 %                                                                cosd(theta2(1,i))*sind(theta1(1,i)),                                                sind(theta1(1,i))*sind(theta2(1,i)),cosd(theta1(1,i))];                                                                                       
 
-
 end
 
 %%%%%%%%%%%%%%%%%%%%
 %FORWARD KINEMATICS%
+FK = zeros(3,6);
+for i=1:6    
+    FK(1,i) =  L*sind(Betad(i))+ Lnorm(i)*(sind(Betad(i))*cosd(theta2(1,i)) + cosd(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i)));
+    FK(2,i) = -L*cosd(Betad(i))- Lnorm(i)*(cosd(Betad(i))*cosd(theta2(1,i)) - sind(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i)));
+    FK(3,i) = Lnorm(i)*sind(theta1(1,i))*sind(theta2(1,i));
+end
 %%%%%%%%%%%%%%%%%%%%
 
 %%  Moving Parts
@@ -241,7 +231,7 @@ newV{15} = newV{15} + repmat([L*cosd(195), L*sind(195), 0]',[1 length(V{15}(1,:)
 %newV{3} = newV{3} + repmat(T01a(1:3,4),[1 length(newV{3}(1,:))]); 
 
 
-for ii=[1:15] %(CHENGE n=2 to the number of parts that you have)
+for ii=[1:15] %(CHANGE n=2 to the number of parts that you have)
     set(q(ii),'Vertices',newV{ii}(1:3,:)'); %Set the new position in the handle (graphical link)
 end
              
