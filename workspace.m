@@ -56,8 +56,8 @@ for i=q1
             
         %Creating the variables  (MODIFY)
         
-            theta1=i*pi/180; 
-            theta2=j*pi/180;
+            theta1=i; 
+            theta2=j;
             Lnorm=k;
             
        %Forward Kinematics (Write your forward kinematics for x, y and z)(MODIFY)
