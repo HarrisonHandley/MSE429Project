@@ -38,7 +38,7 @@ setappdata(0,'object_data',object);
 object = getappdata(0,'object_data');
 obj{3}=object; 
 
-load('PrismaticJointRod.mat');
+load('PrismaticJointRod_2016.mat');
 setappdata(0,'object_data',object);
 object = getappdata(0,'object_data');
 obj{4}=object;
@@ -48,7 +48,7 @@ obj{7}=object;
 obj{8}=object;
 obj{9}=object;
 
-load('PrismaticJointShaft.mat');
+load('PrismaticJointShaft_2016.mat');
 setappdata(0,'object_data',object);
 object = getappdata(0,'object_data');
 obj{10}=object;
