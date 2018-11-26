@@ -84,10 +84,18 @@ PP =2.5;                    % Length second Length
 %%%%%%%%%%%%%%%%%%%%
 x0=500; y0=-1000; z0=2000;  %Random Position and Orientation of Mobile Platform
 gamma=20; beta=30; alpha=-10;
-R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
-       cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
-       sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
 
+%RYRXRZ
+% R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
+%        cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
+%        sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
+
+% Euler angle representation
+% Performs Roll, Pitch & then Yaw. Alpha = rotation about Z axis (yaw) 
+% Rz(Alpha)*Ry(Beta)*Rx(Gamma)
+R0_ee=[cosd(alpha)*cosd(beta), cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma), cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma)
+           sind(alpha)*cosd(beta), sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma), sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma)
+           -sind(beta)           , cosd(beta)*sind(gamma)                                    , cosd(beta)*cosd(gamma)];
 %WRITE HERE THE INVERSE KINEMATICS FOR ALL THE THREE BRANCHES, SOLVE FOR
 %THE THREE ANGLES
 
@@ -172,6 +180,19 @@ for i=1:6
     FK(2,i) = -L*cosd(Betad(i))- Lnorm(i)*(cosd(Betad(i))*cosd(theta2(1,i)) - sind(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i)));
     FK(3,i) = Lnorm(i)*sind(theta1(1,i))*sind(theta2(1,i));
 end
+mid_12 = (FK(:,1)+FK(:,2))/2;
+avg_b0pi = mean(FK,2);
+pv = mid_12 - avg_b0pi; %y' axis of platform
+pw = cross(FK(:,1),FK(:,2)); %x' axis of platform
+pu = cross(pv,pw); %z' axis of platform
+
+%Not sure about this part 
+% p_cosRoll = dot(pu,[1,0,0]')/norm(pu); 
+% p_cosPitch = dot(pv,[0,1,0]')/norm(pv);
+% p_cosYaw = dot(pw,[0,0,1]')/norm(pw);
+% roll = atan2d(sqrt(1-p_cosRoll^2),p_cosRoll)
+% pitch = atan2d(sqrt(1-p_cosPitch^2),p_cosPitch)
+% yaw = atan2d(sqrt(1-p_cosYaw^2),p_cosYaw)
 %%%%%%%%%%%%%%%%%%%%
 
 %%  Moving Parts
