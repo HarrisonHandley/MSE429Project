@@ -51,7 +51,7 @@ obj{7}=object;
 obj{8}=object;
 obj{9}=object;
 
-load('PrismaticJointShaft_2016.mat');
+load('PrismaticJointShaftNew.mat');
 setappdata(0,'object_data',object);
 object = getappdata(0,'object_data');
 obj{10}=object;
