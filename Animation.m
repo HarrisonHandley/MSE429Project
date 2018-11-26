@@ -110,9 +110,14 @@ for j=1:n
     beta = position(5,j);
     gamma = position(6,j);
     
-R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
-       cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
-       sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
+    R0_ee=[cosd(alpha)*cosd(beta), cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma), cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma)
+           sind(alpha)*cosd(beta), sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma), sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma)
+           -sind(beta)           , cosd(beta)*sind(gamma)                                    , cosd(beta)*cosd(gamma)];
+
+   
+% R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
+%        cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
+%        sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
 
 %WRITE HERE THE INVERSE KINEMATICS FOR ALL THE THREE BRANCHES, SOLVE FOR
 %THE THREE ANGLES
@@ -127,7 +132,7 @@ Beta = [225
          195];
      
 % Beta = angle to get to X axis for zero displacement config      
-Betad = Beta+ 90;
+Betad = Beta + 90;
 
 %Platform Angles
 anglePlat = [255
