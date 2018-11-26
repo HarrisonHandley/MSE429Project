@@ -180,11 +180,13 @@ for i=1:6
     FK(2,i) = -L*cosd(Betad(i))- Lnorm(i)*(cosd(Betad(i))*cosd(theta2(1,i)) - sind(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i)));
     FK(3,i) = Lnorm(i)*sind(theta1(1,i))*sind(theta2(1,i));
 end
-mid_12 = (FK(:,1)+FK(:,2))/2;
-avg_b0pi = mean(FK,2);
-pv = mid_12 - avg_b0pi; %y' axis of platform
-pw = cross(FK(:,1),FK(:,2)); %x' axis of platform
-pu = cross(pv,pw); %z' axis of platform
+mid_12 = (FK(:,4)+FK(:,5))/2;
+avg_b0p0 = mean(FK,2);
+pv = mid_12 - avg_b0p0; 
+pv = pv/norm(pv); %y' axis of platform
+pw = cross(FK(:,4),FK(:,5)); 
+pw = pw/norm(pw); %z' axis of platform
+pu = cross(pv,pw); %x' axis of platform
 
 %Not sure about this part 
 % p_cosRoll = dot(pu,[1,0,0]')/norm(pu); 

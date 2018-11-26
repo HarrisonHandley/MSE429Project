@@ -21,6 +21,9 @@ view(60,30)
    line([0,0],[0,0], [0,arrow_length]); text(0,0,arrow_length*1.1,'z_0','FontSize',14); 
    line([0,0],[0,arrow_length],[0,0]); text(0,arrow_length*1.1, 0,'y_0','FontSize',14); 
    line([0,arrow_length],[0,0],[0,0]); text(arrow_length*1.1, 0, 0,'x_0','FontSize',14); 
+   
+%NEW axis([Xmin Xmax Ymin Ymax Zmin Zmax]); 
+axis([-2000 3000 -2000 3000 0 3000]); 
 
 %% Convert figure into Object (LOAD YOUR PARTS)       
 load('Platform.mat');
@@ -70,6 +73,10 @@ set(q(3),'FaceColor', [0.2,0.7,0.6]);
 set(q(4:9),'FaceColor', [0.4,0.9,1]);
 set(q(10:15),'FaceColor', [1,0.9,0.4]);
 
+% ANIMATION % Animation (DO NOT CHANGE) 
+RGB=256;  %Resolution 
+fm = getframe; [img,map] = rgb2ind(fm.cdata,RGB,'nodither'); 
+
 
 %%  KINEMATICS
 %Characteristics of the manipulator
@@ -79,6 +86,9 @@ LL=1000;                      % mobile length (centre to joint)
 P=3;                        % Link first length
 PP =2.5;                    % Length second Length
 
+
+%PATH GENERATION (MODIFY) 
+%Spatial Coordinates of the end-effector and time vector 
 dt=0.1; %stepsize
 P_ee = [0 0.05 0 0; 
         0 0.05 0 0;
@@ -90,6 +100,12 @@ tf = [0.40385,0.8077,0.8077];
 
 [position,velocity,acceleration,time]=via_points_match_VA(P_ee, tf, dt, 'prescribed',[0,0]);
 
+%ANIMATION (DO NOT CHANGE)    
+n=length(position(1,:));     
+mov(1:length(n)) = struct('cdata', [],'colormap', []);    
+[a,b]=size(img); gifim=zeros(a,b,1,n-1,'uint8'); 
+ 
+
 %%%%%%%%%%%%%%%%%%%%
 %INVERSE KINEMATICS%
 %%%%%%%%%%%%%%%%%%%%
@@ -98,31 +114,9 @@ tf = [0.40385,0.8077,0.8077];
 % R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
 %        cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
 %        sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
-[m,n] = size(position);
+%[m,n] = size(position);
 
-%% This loop iterates through all the desired end effector points for the IK & Animation 
-for j=1:n
-    
-    x0 = 10000*position(1,j);
-    y0 = 10000*position(2,j);
-    z0 = 10000*position(3,j);
-    alpha=position(4,j);
-    beta = position(5,j);
-    gamma = position(6,j);
-    
-    R0_ee=[cosd(alpha)*cosd(beta), cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma), cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma)
-           sind(alpha)*cosd(beta), sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma), sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma)
-           -sind(beta)           , cosd(beta)*sind(gamma)                                    , cosd(beta)*cosd(gamma)];
-
-   
-% R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
-%        cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
-%        sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
-
-%WRITE HERE THE INVERSE KINEMATICS FOR ALL THE THREE BRANCHES, SOLVE FOR
-%THE THREE ANGLES
-
-%% My Stuff for IK
+%% IK prep 
 % Base Angles
 Beta = [225
          315
@@ -157,7 +151,29 @@ p0pi = LL*[cosd(anglePlat(1)),cosd(anglePlat(2)),cosd(anglePlat(3)),cosd(anglePl
           sind(anglePlat(1)),sind(anglePlat(2)),sind(anglePlat(3)),sind(anglePlat(4)),sind(anglePlat(5)),sind(anglePlat(6));
           0,0,0,0,0,0];
 
+
+%% This loop iterates through all the desired end effector points for the IK & Animation 
+for j=1:length(position(1,:)) 
     
+    x0 = 10000*position(1,j);
+    y0 = 10000*position(2,j);
+    z0 = 10000*position(3,j);
+    alpha=position(4,j);
+    beta = position(5,j);
+    gamma = position(6,j);
+    
+    R0_ee=[cosd(alpha)*cosd(beta), cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma), cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma)
+           sind(alpha)*cosd(beta), sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma), sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma)
+           -sind(beta)           , cosd(beta)*sind(gamma)                                    , cosd(beta)*cosd(gamma)];
+
+   
+% R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
+%        cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
+%        sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
+
+%WRITE HERE THE INVERSE KINEMATICS FOR ALL THE THREE BRANCHES, SOLVE FOR
+%THE THREE ANGLES
+  
 for i = 1:6
     di(:,i) = [x0; y0; z0] + LL*R0_ee*[cosd(anglePlat(i));sind(anglePlat(i));0] - b0bi(:,i); 
     
@@ -185,10 +201,10 @@ for i = 1:6
     R(:,:,i) = [cosd(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i))-sind(Betad(i))*sind(theta2(1,i)),   -cosd(Betad(i))*sind(theta1(1,i)), sind(Betad(i))*cosd(theta2(1,i))+cosd(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))
             cosd(Betad(i))*sind(theta2(1,i)) + sind(Betad(i))*cosd(theta1(1,i))*cosd(theta2(1,i)), -sind(Betad(i))*sind(theta1(1,i)), -cosd(Betad(i))*cosd(theta2(1,i))+sind(Betad(i))*cosd(theta1(1,i))*sind(theta2(1,i))
                                                               cosd(theta2(1,i))*sind(theta1(1,i)),  cosd(theta1(1,i)),                sind(theta1(1,i))*sind(theta2(1,i))];                                                                                       
-
 end
 
-%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%
 %FORWARD KINEMATICS%
 FK = zeros(3,6);
 for i=1:6    
@@ -258,6 +274,14 @@ newV{15} = newV{15} + repmat([L*cosd(195), L*sind(195), 0]',[1 length(V{15}(1,:)
 for ii=[1:15] %(CHANGE n=2 to the number of parts that you have)
     set(q(ii),'Vertices',newV{ii}(1:3,:)'); %Set the new position in the handle (graphical link)
 end
-             
+
 drawnow
+
+im= frame2im(getframe);      
+gifim(:,:,:,j) = rgb2ind(im, map);     
+mov(j)=getframe(gcf); 
+
 end
+
+%ANIMATION, creates animated gif (DO NOT MODIFY) 
+imwrite(gifim,map,'Project.gif','DelayTime',0)%,'LoopCount',inf) 
