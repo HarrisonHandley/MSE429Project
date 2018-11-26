@@ -107,16 +107,8 @@ mov(1:length(n)) = struct('cdata', [],'colormap', []);
  
 
 %%%%%%%%%%%%%%%%%%%%
-%INVERSE KINEMATICS%
+%% INVERSE KINEMATICS%
 %%%%%%%%%%%%%%%%%%%%
-% x0=500; y0=-1000; z0=2000;  %Random Position and Orientation of Mobile Platform
-% gamma=20; beta=30; alpha=-10;
-% R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
-%        cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
-%        sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
-%[m,n] = size(position);
-
-%% IK prep 
 % Base Angles
 Beta = [225
          315
@@ -165,11 +157,6 @@ for j=1:length(position(1,:))
     R0_ee=[cosd(alpha)*cosd(beta), cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma), cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma)
            sind(alpha)*cosd(beta), sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma), sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma)
            -sind(beta)           , cosd(beta)*sind(gamma)                                    , cosd(beta)*cosd(gamma)];
-
-   
-% R0_ee=[    cosd(beta)*cosd(gamma)                                 ,       -sind(beta)      , cosd(beta)*sind(gamma);...
-%        cosd(alpha)*sind(beta)*cosd(gamma)+sind(alpha)*sind(gamma) , cosd(alpha)*cosd(beta) , cosd(alpha)*sind(beta)*sind(gamma)-sind(alpha)*cosd(gamma);...
-%        sind(alpha)*sind(beta)*cosd(gamma)-cosd(alpha)*sind(gamma) , sind(alpha)*cosd(beta) , sind(alpha)*sind(beta)*sind(gamma)+cosd(alpha)*cosd(gamma)];
 
 %WRITE HERE THE INVERSE KINEMATICS FOR ALL THE THREE BRANCHES, SOLVE FOR
 %THE THREE ANGLES
